@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -e
+
+SCRIPTS_DIR="$HOME/.local/share/kwin/scripts"
+CANONICAL_QML="$HOME/.config/taskbarhoverpeek.qml"
+
+# Se o usuário editou o main.qml dentro da pasta atual do script, sincroniza para o arquivo principal
+CURRENT_DIR=$(find "$SCRIPTS_DIR" -maxdepth 1 -type d -name "taskbarhoverpeek*" | sort -V | tail -n 1)
+if [ -n "$CURRENT_DIR" ] && [ -f "$CURRENT_DIR/contents/ui/main.qml" ]; then
+    if [ ! -f "$CANONICAL_QML" ] || [ "$CURRENT_DIR/contents/ui/main.qml" -nt "$CANONICAL_QML" ]; then
+        cp "$CURRENT_DIR/contents/ui/main.qml" "$CANONICAL_QML"
+    fi
+fi
+
+# Descarrega qualquer versão anterior
+for d in "$SCRIPTS_DIR"/taskbarhoverpeek*; do
+    [ -d "$d" ] || continue
+    old_id=$(basename "$d")
+    kwriteconfig6 --file kwinrc --group Plugins --key "${old_id}Enabled" --delete 2>/dev/null || true
+    qdbus6 org.kde.KWin /Scripting org.kde.kwin.Scripting.unloadScript "$old_id" >/dev/null 2>&1 || true
+    rm -rf "$d"
+done
+
+NEW_ID="taskbarhoverpeek_$(date +%s)"
+NEW_DIR="$SCRIPTS_DIR/$NEW_ID"
+mkdir -p "$NEW_DIR/contents/ui"
+
+cat << EOF > "$NEW_DIR/metadata.json"
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [{ "Name": "Antigravity" }],
+        "Description": "Mostra a janela em tela cheia (Aero Peek) ao passar o mouse diretamente sobre o ícone na barra de tarefas",
+        "Id": "$NEW_ID",
+        "License": "GPL-2.0+",
+        "Name": "Taskbar Hover Peek",
+        "Version": "1.0"
+    },
+    "X-Plasma-API": "declarativescript",
+    "X-Plasma-MainScript": "ui/main.qml"
+}
+EOF
+
+cp "$CANONICAL_QML" "$NEW_DIR/contents/ui/main.qml"
+ln -sf "$NEW_DIR/contents/ui/main.qml" "$SCRIPTS_DIR/main.qml"
+
+kwriteconfig6 --file kwinrc --group Plugins --key "${NEW_ID}Enabled" true
+qdbus6 org.kde.KWin /KWin reconfigure
+
+echo "Taskbar Hover Peek recarregado com sucesso! (Arquivo: $CANONICAL_QML)"
