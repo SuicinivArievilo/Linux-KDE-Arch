@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Removendo KDE Taskbar Hover Peek..."
+echo "Uninstalling KDE Taskbar Hover Peek..."
 
 SCRIPTS_DIR="$HOME/.local/share/kwin/scripts"
 for d in "$SCRIPTS_DIR"/taskbarhoverpeek*; do
@@ -14,8 +14,8 @@ done
 
 rm -f "$SCRIPTS_DIR/main.qml"
 rm -f "$HOME/.config/taskbarhoverpeek.qml"
-rm -f "$HOME/.local/bin/recarregar-peek"
+rm -f "$HOME/.local/bin/reload-peek" "$HOME/.local/bin/recarregar-peek"
 
 qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
 
-echo "Taskbar Hover Peek removido com sucesso!"
+echo "Taskbar Hover Peek removed successfully!"

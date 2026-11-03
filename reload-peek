@@ -4,7 +4,7 @@ set -e
 SCRIPTS_DIR="$HOME/.local/share/kwin/scripts"
 CANONICAL_QML="$HOME/.config/taskbarhoverpeek.qml"
 
-# Se o usuário editou o main.qml dentro da pasta atual do script, sincroniza para o arquivo principal
+# Sync if the user edited main.qml directly inside the active script folder
 CURRENT_DIR=$(find "$SCRIPTS_DIR" -maxdepth 1 -type d -name "taskbarhoverpeek*" | sort -V | tail -n 1)
 if [ -n "$CURRENT_DIR" ] && [ -f "$CURRENT_DIR/contents/ui/main.qml" ]; then
     if [ ! -f "$CANONICAL_QML" ] || [ "$CURRENT_DIR/contents/ui/main.qml" -nt "$CANONICAL_QML" ]; then
@@ -12,7 +12,7 @@ if [ -n "$CURRENT_DIR" ] && [ -f "$CURRENT_DIR/contents/ui/main.qml" ]; then
     fi
 fi
 
-# Descarrega qualquer versão anterior
+# Unload any previous instance to bypass KWin QML cache without logging out
 for d in "$SCRIPTS_DIR"/taskbarhoverpeek*; do
     [ -d "$d" ] || continue
     old_id=$(basename "$d")
@@ -29,8 +29,8 @@ cat << EOF > "$NEW_DIR/metadata.json"
 {
     "KPackageStructure": "KWin/Script",
     "KPlugin": {
-        "Authors": [{ "Name": "Antigravity" }],
-        "Description": "Mostra a janela em tela cheia (Aero Peek) ao passar o mouse diretamente sobre o ícone na barra de tarefas",
+        "Authors": [{ "Name": "SuicinivArievilo" }],
+        "Description": "Instantly previews/highlights open windows on screen when hovering directly over taskbar icons",
         "Id": "$NEW_ID",
         "License": "GPL-2.0+",
         "Name": "Taskbar Hover Peek",
@@ -47,4 +47,4 @@ ln -sf "$NEW_DIR/contents/ui/main.qml" "$SCRIPTS_DIR/main.qml"
 kwriteconfig6 --file kwinrc --group Plugins --key "${NEW_ID}Enabled" true
 qdbus6 org.kde.KWin /KWin reconfigure
 
-echo "Taskbar Hover Peek recarregado com sucesso! (Arquivo: $CANONICAL_QML)"
+echo "Taskbar Hover Peek reloaded successfully! (Config: $CANONICAL_QML)"

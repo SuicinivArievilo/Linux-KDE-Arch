@@ -43,14 +43,14 @@ Item {
         }
         if (groupWins.length <= 1) return;
 
-        // Ordena da maior área para a menor área
+        // Sort windows from largest area to smallest area
         groupWins.sort(function(a, b) {
             const areaA = a.frameGeometry.width * a.frameGeometry.height;
             const areaB = b.frameGeometry.width * b.frameGeometry.height;
             return areaB - areaA;
         });
 
-        // Mantém a janela maior (ex: Biblioteca da Steam) na base e eleva as menores (ex: Lista de amigos e Chat) por cima dela
+        // Keep the largest window (e.g. main Steam Library) at the bottom and elevate smaller windows (e.g. Friends List, Chat) above it
         const saved = [];
         for (let i = 1; i < groupWins.length; i++) {
             const w = groupWins[i];
@@ -106,7 +106,7 @@ Item {
         const matchedClasses = {};
         const matchedIds = [];
 
-        // 1. Descobre qual ícone (resourceClass) está sob o cursor
+        // 1. Identify which taskbar icon (resourceClass) is currently under the cursor
         for (let i = 0; i < wins.length; i++) {
             const w = wins[i];
             if (!w.normalWindow) continue;
@@ -121,7 +121,7 @@ Item {
             }
         }
 
-        // 2. Inclui TODAS as janelas abertas daquele aplicativo
+        // 2. Include ALL open windows belonging to that application
         for (let i = 0; i < wins.length; i++) {
             const w = wins[i];
             if (!w.normalWindow) continue;

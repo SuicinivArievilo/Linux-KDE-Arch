@@ -3,16 +3,17 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Instalando KDE Taskbar Hover Peek..."
+echo "Installing KDE Taskbar Hover Peek..."
 
 mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share/kwin/scripts"
 
-# 1. Copia o QML principal e o utilitário recarregar-peek
+# 1. Copy the main QML script and the reload utility
 cp "$SCRIPT_DIR/taskbarhoverpeek.qml" "$HOME/.config/taskbarhoverpeek.qml"
-cp "$SCRIPT_DIR/recarregar-peek" "$HOME/.local/bin/recarregar-peek"
-chmod +x "$HOME/.local/bin/recarregar-peek"
+cp "$SCRIPT_DIR/reload-peek" "$HOME/.local/bin/reload-peek"
+chmod +x "$HOME/.local/bin/reload-peek"
+ln -sf "$HOME/.local/bin/reload-peek" "$HOME/.local/bin/recarregar-peek"
 
-# 2. Ativa highlightWindows=true em todos os painéis (Gerenciador de tarefas apenas com ícones)
+# 2. Enable highlightWindows=true across all Plasma Task Manager panels
 qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
 var allPanels = panels();
 for (var i = 0; i < allPanels.length; i++) {
@@ -26,7 +27,7 @@ for (var i = 0; i < allPanels.length; i++) {
 }
 ' 2>/dev/null || true
 
-# 3. Configura a transição rápida/limpa (AnimationDurationFactor=0.5, sem MagicLamp/Scale/Squash)
+# 3. Configure clean, snappy window transitions (AnimationDurationFactor=0.5, disable MagicLamp/Scale/Squash)
 kwriteconfig6 --file kdeglobals --group KDE --key AnimationDurationFactor --notify 0.5
 kwriteconfig6 --file kwinrc --group Plugins --key magiclampEnabled false
 kwriteconfig6 --file kwinrc --group Plugins --key squashEnabled false
@@ -36,7 +37,7 @@ qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.unloadEffect squash 2>/dev/nul
 qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.unloadEffect scale 2>/dev/null || true
 qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect highlightwindow 2>/dev/null || true
 
-# 4. Instala e ativa o script no KWin
-"$HOME/.local/bin/recarregar-peek"
+# 4. Load and activate the KWin script
+"$HOME/.local/bin/reload-peek"
 
-echo "Instalação concluída com sucesso!"
+echo "Installation completed successfully!"
